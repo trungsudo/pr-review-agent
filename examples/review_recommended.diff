@@ -1,0 +1,5 @@
+diff --git a/billing/invoice.py b/billing/invoice.py
+--- a/billing/invoice.py
++++ b/billing/invoice.py
+@@ -37,0 +40 @@
++            f.write(f"invoice_id,total\n{self.id},{self.total()}\n")
