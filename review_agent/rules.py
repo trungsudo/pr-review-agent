@@ -184,19 +184,19 @@ class DebugLeftBehind(Rule):
         return findings
 
 
-class NoTestsForLogic(Rule):
+class NoTestsForLogic:
     """Logic-only Python change with zero test-file changes.
 
     Deliberately a *comment*, not an error: absence of test changes is easy
-    to detect but does not prove a defect. It prompts the author without
-    turning a heuristic into merge authority.
+    to detect but does not prove a defect. This is a pull-request-level check,
+    so it does not inherit from Rule, whose check() contract is per-file.
     """
 
     ID = "no-tests"
     SEVERITY = "comment"
     CATEGORY = "tests"
 
-    def check_fileless(self, files: list[FileDiff]) -> Finding | None:
+    def check_pr(self, files: list[FileDiff]) -> Finding | None:
         code_files = [
             f
             for f in files
@@ -245,7 +245,7 @@ RULES: list[Rule] = [BareExcept(), SecretInDiff(), DebugLeftBehind()]
 
 
 def run_rules(files: list[FileDiff]) -> list[Finding]:
-    """Run every per-line rule over every reviewable file."""
+    """Run per-file rules and the pull-request-level test-coverage check."""
     findings: list[Finding] = []
     for filediff in files:
         if filediff.skipped_reason:
@@ -253,7 +253,7 @@ def run_rules(files: list[FileDiff]) -> list[Finding]:
         for rule in RULES:
             findings.extend(rule.check(filediff))
 
-    no_tests = NoTestsForLogic().check_fileless(files)
+    no_tests = NoTestsForLogic().check_pr(files)
     if no_tests:
         findings.append(no_tests)
     return findings

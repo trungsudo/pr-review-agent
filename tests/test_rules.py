@@ -3,7 +3,12 @@
 from __future__ import annotations
 
 from review_agent.diffparse import DiffParser
-from review_agent.rules import BareExcept, SecretInDiff, DebugLeftBehind
+from review_agent.rules import (
+    BareExcept,
+    DebugLeftBehind,
+    NoTestsForLogic,
+    SecretInDiff,
+)
 
 
 def _one_file_diff(body_lines: list[str], path: str = "app.py") -> str:
@@ -138,3 +143,18 @@ def test_debug_print_rule():
 def test_debug_print_ignores_logger_calls():
     diff = _one_file_diff(["+logger.info('done')"])
     assert DebugLeftBehind().check(DiffParser().parse(diff)[0]) == []
+
+
+def test_no_tests_for_logic_checks_the_whole_pr():
+    parser = DiffParser()
+    app_files = parser.parse(_one_file_diff(["+value = 1"], "src/app.py"))
+
+    finding = NoTestsForLogic().check_pr(app_files)
+    assert finding is not None
+    assert finding.category == "tests"
+    assert finding.severity == "comment"
+
+    test_files = parser.parse(
+        _one_file_diff(["+def test_value():", "+    assert True"], "tests/test_app.py")
+    )
+    assert NoTestsForLogic().check_pr(app_files + test_files) is None
