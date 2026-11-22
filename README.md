@@ -37,8 +37,9 @@ final report + verdict
 ```
 
 The stages run sequentially because the AI candidate stage receives rule
-findings as context. The trust gate filters AI candidates; rule findings
-remain separately identifiable in the final report.
+findings as context. The current stub ignores that context and replays its
+fixed catalogue. The trust gate filters AI candidates; rule findings remain
+separately identifiable in the final report.
 
 | Stage | What it does | Why |
 |---|---|---|
@@ -60,13 +61,6 @@ From the repository root:
 ```console
 # Run a non-interactive review of the sample diff
 python -m review_agent examples/sample_diff.txt
-
-# Run a small example for a basic verdict
-python -m review_agent examples/request_changes.diff
-python -m review_agent examples/incomplete_review.diff
-python -m review_agent examples/no_issues.diff
-python -m review_agent examples/non_blocking_findings.diff
-python -m review_agent examples/review_recommended.diff
 
 # Review findings interactively and save your decisions
 python -m review_agent --interactive examples/sample_diff.txt
